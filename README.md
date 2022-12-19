@@ -4,7 +4,7 @@
 
 1. Download the necessary files or clone this project anywhere.
 ```sh
-$git clone https://github.com/dog1912/ping-and-notifications-to-telegram.git
+git clone https://github.com/dog1912/ping-and-notifications-to-telegram.git
 ```
 2. Add your domain name or ip address for the router to the ping.sh and pinger.sh script files.
 
