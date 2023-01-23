@@ -1,22 +1,58 @@
 #!/bin/bash
-TOKEN=Token bot from telegram
-if [[ "$1" = "lesnoy" ]]; then
-count=$(ping -c 4 "$1" | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
-if [ $count -eq 0 ]; then
-curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=234531726 -d text="No ping $1"
-curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=790786279 -d text="No ping $1"
-bash /root/scripts/pinger.sh $1 > /dev/null
-wait
+TOKEN='Token bot from telegram'
+PING_TIMEOUT=5
+declare -A TARGETS
+TARGETS=([host1]="chat id channel" [host2]="chat id channel")
+
+target=$1
+chat_ids=${TARGETS[$target]}
+
+if [ -z "$chat_ids" ]; then
+    echo "Invalid target. Expected one of: ${!TARGETS[@]}"
+    exit 1
 fi
-elif [[ "$1" = "volkova" ]]; then
-count=$(ping -c 4 "$1" | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
+
+count=$(ping -c 4 -w $PING_TIMEOUT $target | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
+
 if [ $count -eq 0 ]; then
-curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=234531726 -d text="No ping $1"
-curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=790786279 -d text="No ping $1"
-curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=-1001725585015 -d text="Электричество выключено"
-bash /root/scripts/pinger.sh $1 > /dev/null
-wait
-fi
-else
-    echo "FAIL"
+    for chat_id in $chat_ids; do
+        start_time=$(date +%s)
+        curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=$chat_id -d text="Электричество выключено"
+    done
+    function waitHost
+    {
+        if [ -n "$target" ];
+        then
+            waitForHost $target;
+        else
+            echo "waitHost: Hostname argument expected"
+        fi
+    }
+
+    function waitForHost
+    {
+        reachable=0;
+        while [ $reachable -eq 0 ];
+        do
+        ping -q -c 1 $target
+        if [ "$?" -eq 0 ];
+        then
+            chat_ids=${TARGETS[$1]}
+            if [ -n "$chat_ids" ]; then
+                for chat_id in $chat_ids; do
+                    end_time=$(date +%s)
+                    diff_time=$((end_time-start_time))
+                    hours=$((diff_time / 3600))
+                    minutes=$(((diff_time / 60 + 1) % 60))
+                    curl -s -X POST https://api.telegram.org/bot$TOKEN/sendMessage -d chat_id=$chat_id -d text="Электричество включено. Электричество отсутствовало: $hours часов $minutes минут"
+                done
+                reachable=1
+            else
+                echo "Sending messages is not configured for $target"
+            fi
+        fi
+        done
+        sleep 5
+    }
+    waitHost $target
 fi
