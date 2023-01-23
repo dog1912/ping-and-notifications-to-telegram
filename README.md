@@ -4,14 +4,14 @@
 
 1. Download the necessary files or clone this project anywhere.
 ```sh
-$git clone https://github.com/dog1912/ping-and-notifications-to-telegram.git
+git clone https://github.com/dog1912/ping-and-notifications-to-telegram.git
 ```
 2. Add your domain name or ip address for the router to the ping.sh and pinger.sh script files.
 
-3. Edit the value of TOKEN and CHAT_ID to send a notification to telegram
+3. Edit the value of TOKEN and "chat id channel" to send a notification to telegram
 ```sh
-TOKEN=Token bot from telegram
-CHAT_ID=ID Admin
+TOKEN="Token bot from telegram"
+TARGETS=([host1]="chat id channel" [host2]="chat id channel")
 ```
 4. Add the task to the crontab with flock to prevent re-runs. Instead of /scripts/ you need to specify your path
 
