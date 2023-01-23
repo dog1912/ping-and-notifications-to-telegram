@@ -6,7 +6,11 @@
 ```sh
 git clone https://github.com/dog1912/ping-and-notifications-to-telegram.git
 ```
-2. Add your domain name or ip address for the router to the ping.sh and pinger.sh script files.
+2. Add your domain name or ip address for the router to the ping.sh  script files. For convenience, you can add an entry in the hosts:
+```sh
+8.8.8.8 host1
+1.1.1.1 host2
+```
 
 3. Edit the value of TOKEN and "chat id channel" to send a notification to telegram
 ```sh
